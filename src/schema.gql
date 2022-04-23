@@ -1,0 +1,123 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Team {
+  id: ID!
+  teamName: String!
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  invitees: [Profile!]!
+  members: [Profile!]!
+  services: [Svc!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Svc {
+  id: ID!
+  name: String!
+  description: String
+  icon: String
+  url: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  developer: Profile
+  team: Team
+}
+
+type Profile {
+  id: ID!
+  username: String!
+  icon: String
+  selfIntro: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  userId: String!
+  services: [Svc!]
+  inviters: [Team!]
+  teams: [Team!]
+}
+
+type Svcs {
+  svcs: [Svc!]
+  count: Int!
+}
+
+type Teams {
+  teams: [Team!]
+  count: Float!
+}
+
+type Query {
+  getProfilesByUsername(username: String!): [Profile!]!
+  getProfilesByIds(ids: [ID]!): [Profile!]!
+  getProfileById(id: String!): Profile!
+  getSvcs(page: Int!): Svcs!
+  getSvcsByProfileId(profileId: String!, page: Int!): Svcs!
+  getSvcById(id: String!): Svc!
+  getTeamsByTeamName(teamName: String!): [Team!]!
+  getTeamsByMemberId(memberId: String!, page: Int!): Teams!
+  getTeamById(id: String!): Team!
+}
+
+type Mutation {
+  getOrCreateProfile(input: CreateProfileInput!): Profile!
+  updateProfile(input: UpdateProfileInput!, id: ID!): Profile!
+  deleteProfile(id: ID!): Profile!
+  createSvc(input: CreateSvcInput!): Svc!
+  updateSvc(input: UpdateSvcInput!, id: ID!): Svc!
+  deleteSvc(id: ID!): Svc!
+  createTeam(input: CreateTeamInput!): Team!
+  updateTeam(input: UpdateTeamInput!, id: ID!): Team!
+  inviteUsersToTeam(profileIds: [String!]!, id: ID!): Team!
+  deleteInviteesFromTeam(profileIds: [String!]!, id: ID!): Team!
+  addMembersToTeam(profileIds: [String!]!, id: ID!): Team!
+  deleteMembersFromTeam(input: [String!]!, id: ID!): Team!
+  deleteTeam(id: ID!): Team!
+}
+
+input CreateProfileInput {
+  username: String!
+  userId: String!
+}
+
+input UpdateProfileInput {
+  username: String
+  icon: String
+  selfIntro: String
+}
+
+input CreateSvcInput {
+  name: String!
+  description: String
+  icon: String
+  url: String!
+  developerId: String
+  teamId: String
+}
+
+input UpdateSvcInput {
+  name: String
+  description: String
+  icon: String
+  url: String
+}
+
+input CreateTeamInput {
+  teamName: String!
+  description: String
+  inviteeIds: [ID]!
+  memberIds: [ID!]!
+}
+
+input UpdateTeamInput {
+  teamName: String
+  description: String
+  inviteeIds: [ID]!
+  memberIds: [ID!]!
+}
