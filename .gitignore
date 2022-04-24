@@ -35,8 +35,6 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 .env*
-<<<<<<< HEAD
-=======
 
->>>>>>> f29536c5dd7e94661853b62e293821a4a7513d23
+.dockerignore
 Dockerfile
