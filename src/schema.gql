@@ -48,6 +48,16 @@ type Svcs {
   count: Int!
 }
 
+type TeamInvitees {
+  id: ID!
+  invitees: [Profile!]!
+}
+
+type TeamMembers {
+  id: ID!
+  members: [Profile!]!
+}
+
 type Teams {
   teams: [Team!]
   count: Float!
@@ -60,7 +70,7 @@ type Query {
   getSvcs(page: Int!): Svcs!
   getSvcsByProfileId(profileId: String!, page: Int!): Svcs!
   getSvcById(id: String!): Svc!
-  getTeamsByTeamName(teamName: String!): [Team!]!
+  getTeamsByTeamNameAndMemberId(memberId: String!, teamName: String!): [Team!]!
   getTeamsByMemberId(memberId: String!, page: Int!): Teams!
   getTeamById(id: String!): Team!
 }
@@ -74,10 +84,10 @@ type Mutation {
   deleteSvc(id: ID!): Svc!
   createTeam(input: CreateTeamInput!): Team!
   updateTeam(input: UpdateTeamInput!, id: ID!): Team!
-  inviteUsersToTeam(profileIds: [String!]!, id: ID!): Team!
-  deleteInviteesFromTeam(profileIds: [String!]!, id: ID!): Team!
-  addMembersToTeam(profileIds: [String!]!, id: ID!): Team!
-  deleteMembersFromTeam(input: [String!]!, id: ID!): Team!
+  inviteUsersToTeam(profileIds: [String!]!, id: ID!): TeamInvitees!
+  deleteInviteesFromTeam(profileIds: [String!]!, id: ID!): TeamInvitees!
+  addMembersToTeam(profileIds: [String!]!, id: ID!): TeamMembers!
+  deleteMembersFromTeam(profileIds: [String!]!, id: ID!): TeamMembers!
   deleteTeam(id: ID!): Team!
 }
 
