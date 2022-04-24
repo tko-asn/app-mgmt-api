@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/entities/profile.entity';
 import { Team } from 'src/entities/team.entity';
 import { ProfileService } from 'src/profile/profile.service';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateTeamInput } from './dto/create-team.input';
 import { UpdateTeamInput } from './dto/update-team.input';
 
@@ -18,12 +18,14 @@ export class TeamService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async findByTeamName(teamName: string) {
-    const teams = await this.teamRepository.find({
-      where: {
-        teamName: Like(`%${teamName}%`),
-      },
-    });
+  async findByTeamNameAndProfileId(teamName: string, profileId: string) {
+    const teams = await this.teamRepository
+      .createQueryBuilder('team')
+      .innerJoin('team.members', 'member', 'member.id = :profileId', {
+        profileId,
+      })
+      .where('team.teamName like :teamName', { teamName: `%${teamName}%` })
+      .getMany();
     if (!teams.length) {
       throw new NotFoundException('Cound not find teams');
     }
