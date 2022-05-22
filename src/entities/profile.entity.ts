@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Svc } from './svc.entity';
 import { Team } from './team.entity';
+import { Comment } from './comment.entity';
 
 @Entity()
 @ObjectType()
@@ -57,4 +58,18 @@ export class Profile {
   @JoinTable()
   @Field(() => [Team], { nullable: true })
   teams?: Team[];
+
+  @ManyToMany(() => Comment, (comment) => comment.likes)
+  @JoinTable()
+  @Field(() => [Comment], { nullable: true })
+  likedComments?: Comment[];
+
+  @ManyToMany(() => Comment, (comment) => comment.dislikes)
+  @JoinTable()
+  @Field(() => [Comment], { nullable: true })
+  dislikedComments?: Comment[];
+
+  @OneToMany(() => Comment, (comment) => comment.author)
+  @Field(() => [Comment], { nullable: true })
+  comments?: Comment[];
 }

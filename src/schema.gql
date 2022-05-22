@@ -18,6 +18,19 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Comment {
+  id: ID!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  likes: [Profile!]
+  dislikes: [Profile!]
+  author: Profile!
+  svc: Svc
+  commentId: ID
+  comment: Comment
+}
+
 type Svc {
   id: ID!
   name: String!
@@ -28,6 +41,7 @@ type Svc {
   updatedAt: DateTime!
   developer: Profile
   team: Team
+  comments: [Comment!]
 }
 
 type Profile {
@@ -41,6 +55,9 @@ type Profile {
   services: [Svc!]
   inviters: [Team!]
   teams: [Team!]
+  likedComments: [Comment!]
+  dislikedComments: [Comment!]
+  comments: [Comment!]
 }
 
 type Svcs {
@@ -63,6 +80,24 @@ type Teams {
   count: Float!
 }
 
+type Comments {
+  comments: [Comment!]
+  count: Int!
+  page: Int!
+}
+
+type CommentsOnComment {
+  comments: [Comment!]
+  count: Int!
+  page: Int!
+  commentId: ID!
+}
+
+type UpdateComment {
+  id: ID!
+  content: String!
+}
+
 type Query {
   getProfilesByUsername(username: String!): [Profile!]!
   getProfilesByIds(ids: [ID]!): [Profile!]!
@@ -73,6 +108,9 @@ type Query {
   getTeamsByTeamNameAndMemberId(memberId: String!, teamName: String!): [Team!]!
   getTeamsByMemberId(memberId: String!, page: Int!): Teams!
   getTeamById(id: String!): Team!
+  getCommentsBySvcId(all: Boolean, page: Int, svcId: ID!): Comments!
+  getCommentsByCommentIds(page: Int, commentIds: [ID]!): [CommentsOnComment!]!
+  getCommentsByCommentId(all: Boolean, page: Int, commentId: ID!): Comments!
 }
 
 type Mutation {
@@ -89,6 +127,13 @@ type Mutation {
   addMembersToTeam(profileIds: [String!]!, id: ID!): TeamMembers!
   deleteMembersFromTeam(profileIds: [String!]!, id: ID!): TeamMembers!
   deleteTeam(id: ID!): Team!
+  createComment(input: CreateCommentInput!): Comment!
+  likeComment(profileId: ID!, id: ID!): Comment!
+  removeLike(profileId: ID!, id: ID!): Comment!
+  dislikeComment(profileId: ID!, id: ID!): Comment!
+  removeDislike(profileId: ID!, id: ID!): Comment!
+  updateComment(content: String!, id: ID!): UpdateComment!
+  deleteComment(id: ID!): Comment!
 }
 
 input CreateProfileInput {
@@ -130,4 +175,11 @@ input UpdateTeamInput {
   description: String
   inviteeIds: [ID]!
   memberIds: [ID!]!
+}
+
+input CreateCommentInput {
+  content: String!
+  authorId: ID!
+  svcId: ID
+  commentId: ID
 }
