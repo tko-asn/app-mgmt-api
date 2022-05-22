@@ -79,4 +79,34 @@ export class ProfileService {
     await this.profileRepository.remove(profile);
     return profile;
   }
+
+  async validateProfileIds(profileIds: string[], actualProfiles?: Profile[]) {
+    let profileIdsToRegister = [...profileIds];
+
+    // profileIdsのprofileが既にactualProfilesに存在しているか検証
+    if (actualProfiles) {
+      const removeProfileIds: string[] = [];
+      for (const profile of actualProfiles) {
+        if (profileIds.includes(profile.id)) {
+          removeProfileIds.push(profile.id);
+        }
+      }
+      // 存在する場合は削除
+      profileIdsToRegister = profileIds.filter(
+        (profileId) => !removeProfileIds.includes(profileId),
+      );
+    }
+
+    if (!profileIdsToRegister.length) {
+      return [];
+    }
+
+    const profiles = await this.findByIds(profileIdsToRegister).catch((err) => {
+      if (err.status === 404) {
+        throw new BadRequestException('Invalid profileIds');
+      }
+      throw err;
+    });
+    return profiles;
+  }
 }
