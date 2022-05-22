@@ -1,7 +1,14 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Profile } from './profile.entity';
 import { Team } from './team.entity';
+import { Comment } from './comment.entity';
 
 @Entity()
 @ObjectType()
@@ -46,4 +53,8 @@ export class Svc {
   @ManyToOne(() => Team, (team) => team.services)
   @Field(() => Team, { nullable: true })
   team?: Team;
+
+  @OneToMany(() => Comment, (comment) => comment.svc)
+  @Field(() => [Comment], { nullable: true })
+  comments?: Comment[];
 }
