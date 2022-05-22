@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SvcModule } from './svc/svc.module';
 import { SvcResolver } from './svc/svc.resolver';
 import { TeamModule } from './team/team.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TeamModule } from './team/team.module';
     ProfileModule,
     SvcModule,
     TeamModule,
+    CommentModule,
   ],
   providers: [ProfileResolver, SvcResolver],
 })
