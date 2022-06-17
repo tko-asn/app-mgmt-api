@@ -74,6 +74,16 @@ export class ProfileService {
     return await this.profileRepository.save({ id, ...profile });
   }
 
+  async updateIcon(id: string, icon: string) {
+    const profile = await this.findOneById(id).catch((err) => {
+      if (err.status === 404) {
+        throw new BadRequestException('Invalid profile id');
+      }
+      throw err;
+    });
+    return await this.profileRepository.save({ ...profile, id, icon });
+  }
+
   async delete(id: string) {
     const profile = await this.findOneById(id);
     await this.profileRepository.remove(profile);
