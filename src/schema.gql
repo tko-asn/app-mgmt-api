@@ -102,6 +102,7 @@ type Query {
   getProfilesByUsername(username: String!): [Profile!]!
   getProfilesByIds(ids: [ID]!): [Profile!]!
   getProfileById(id: String!): Profile!
+  getProfileByUserId(userId: String!): Profile!
   getSvcs(page: Int!): Svcs!
   getSvcsByProfileId(profileId: String!, page: Int!): Svcs!
   getSvcById(id: String!): Svc!
@@ -114,14 +115,15 @@ type Query {
 }
 
 type Mutation {
-  getOrCreateProfile(input: CreateProfileInput!): Profile!
+  createProfile(input: CreateProfileInput!): Profile!
   updateProfile(input: UpdateProfileInput!, id: ID!): Profile!
+  changeIcon(icon: String!, id: ID!): Profile!
   deleteProfile(id: ID!): Profile!
   createSvc(input: CreateSvcInput!): Svc!
   updateSvc(input: UpdateSvcInput!, id: ID!): Svc!
   deleteSvc(id: ID!): Svc!
-  createTeam(input: CreateTeamInput!): Team!
-  updateTeam(input: UpdateTeamInput!, id: ID!): Team!
+  createTeam(input: SetTeamInput!): Team!
+  updateTeam(input: SetTeamInput!, id: ID!): Team!
   inviteUsersToTeam(profileIds: [String!]!, id: ID!): TeamInvitees!
   deleteInviteesFromTeam(profileIds: [String!]!, id: ID!): TeamInvitees!
   addMembersToTeam(profileIds: [String!]!, id: ID!): TeamMembers!
@@ -138,11 +140,12 @@ type Mutation {
 
 input CreateProfileInput {
   username: String!
+  selfIntro: String
   userId: String!
 }
 
 input UpdateProfileInput {
-  username: String
+  username: String!
   icon: String
   selfIntro: String
 }
@@ -157,21 +160,14 @@ input CreateSvcInput {
 }
 
 input UpdateSvcInput {
-  name: String
+  name: String!
   description: String
   icon: String
-  url: String
+  url: String!
 }
 
-input CreateTeamInput {
+input SetTeamInput {
   teamName: String!
-  description: String
-  inviteeIds: [ID]!
-  memberIds: [ID!]!
-}
-
-input UpdateTeamInput {
-  teamName: String
   description: String
   inviteeIds: [ID]!
   memberIds: [ID!]!
