@@ -1,10 +1,10 @@
 import { ValidationPipe } from '@nestjs/common';
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Profile } from 'src/entities/profile.entity';
-import { CreateProfileInput } from './dto/create-profile.input';
 import { UpdateProfileInput } from './dto/update-profile.input';
 import { ProfileService } from './profile.service';
 import { Public } from '../decorators/public.decorator';
+import { CreateProfileInput } from './dto/create-profile.input';
 
 @Resolver(() => Profile)
 export class ProfileResolver {
@@ -38,20 +38,28 @@ export class ProfileResolver {
     return this.profileService.findOneById(id);
   }
 
+  @Query(() => Profile)
+  getProfileByUserId(@Args('userId') userId: string) {
+    return this.profileService.findOneByUserId(userId);
+  }
+
   @Mutation(() => Profile)
   @Public()
-  async getOrCreateProfile(
+  async createProfile(
     @Args('input', new ValidationPipe()) profileInput: CreateProfileInput,
   ) {
-    const profile = await this.profileService
+    let profile;
+    await this.profileService
       .findOneByUserId(profileInput.userId)
-      .catch((err) => {
+      .catch(async (err) => {
         if (err.status === 404) {
-          return this.profileService.create(profileInput);
+          profile = await this.profileService.create(profileInput);
         }
-        throw err;
       });
-    return profile;
+    if (profile) {
+      return profile;
+    }
+    throw new Error('This user already exists');
   }
 
   @Mutation(() => Profile)
@@ -60,6 +68,14 @@ export class ProfileResolver {
     @Args('input', new ValidationPipe()) profileInput: UpdateProfileInput,
   ) {
     return this.profileService.update(id, profileInput);
+  }
+
+  @Mutation(() => Profile)
+  changeIcon(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('icon') icon: string,
+  ) {
+    return this.profileService.updateIcon(id, icon);
   }
 
   @Mutation(() => Profile)

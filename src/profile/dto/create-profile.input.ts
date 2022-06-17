@@ -1,13 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { UpdateProfileInput } from './update-profile.input';
 
 @InputType()
-export class CreateProfileInput {
+export class CreateProfileInput extends UpdateProfileInput {
   @Field()
   @IsString()
-  username!: string;
-
-  @Field()
-  @IsString()
+  @IsNotEmpty()
   userId!: string;
 }

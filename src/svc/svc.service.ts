@@ -57,6 +57,11 @@ export class SvcService {
 
   async create(svc: CreateSvcInput) {
     const { developerId, teamId, ...svcProps } = svc;
+    if (!developerId && !teamId) {
+      throw new BadRequestException(
+        'You must specify either developerId or teamId',
+      );
+    }
     const createdSvc = this.svcRepository.create(svcProps);
     if (developerId) {
       const developer = await this.profileService

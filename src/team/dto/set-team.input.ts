@@ -1,15 +1,21 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsArray, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 @InputType()
-export class UpdateTeamInput {
+export class SetTeamInput {
   @Field()
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   @MaxLength(30)
-  teamName?: string;
+  teamName!: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   description?: string;

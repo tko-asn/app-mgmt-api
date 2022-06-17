@@ -7,8 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from 'src/entities/team.entity';
 import { ProfileService } from 'src/profile/profile.service';
 import { Repository } from 'typeorm';
-import { CreateTeamInput } from './dto/create-team.input';
-import { UpdateTeamInput } from './dto/update-team.input';
+import { SetTeamInput } from './dto/set-team.input';
 
 @Injectable()
 export class TeamService {
@@ -57,7 +56,7 @@ export class TeamService {
     return team;
   }
 
-  async create(team: CreateTeamInput) {
+  async create(team: SetTeamInput) {
     const { inviteeIds, memberIds, ...teamProps } = team;
     if (!memberIds.length) {
       throw new Error('Team needs at least one member');
@@ -74,7 +73,7 @@ export class TeamService {
     return await this.teamRepository.save(createdTeam);
   }
 
-  async update(id: string, team: UpdateTeamInput) {
+  async update(id: string, team: SetTeamInput) {
     const { teamName, description, inviteeIds, memberIds } = team;
     if (!memberIds.length) {
       throw new Error('Team needs at least one member');
