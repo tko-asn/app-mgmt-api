@@ -5,8 +5,7 @@ import { Team } from 'src/entities/team.entity';
 import { TeamInvitees } from 'src/models/team-invitees.models';
 import { TeamMembers } from 'src/models/team-members.models';
 import { Teams } from 'src/models/teams.models';
-import { CreateTeamInput } from './dto/create-team.input';
-import { UpdateTeamInput } from './dto/update-team.input';
+import { SetTeamInput } from './dto/set-team.input';
 import { TeamService } from './team.service';
 
 @Resolver(() => Team)
@@ -43,14 +42,14 @@ export class TeamResolver {
   }
 
   @Mutation(() => Team)
-  createTeam(@Args('input', new ValidationPipe()) teamInput: CreateTeamInput) {
+  createTeam(@Args('input', new ValidationPipe()) teamInput: SetTeamInput) {
     return this.teamService.create(teamInput);
   }
 
   @Mutation(() => Team)
   updateTeam(
     @Args('id', { type: () => ID }) id: string,
-    @Args('input', new ValidationPipe()) teamInput: UpdateTeamInput,
+    @Args('input', new ValidationPipe()) teamInput: SetTeamInput,
   ) {
     return this.teamService.update(id, teamInput);
   }
