@@ -1,26 +1,26 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { Field, ID, InputType } from '@nestjs/graphql';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @InputType()
 export class UpdateSvcInput {
   @Field()
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   @MaxLength(30)
-  name?: string;
+  name!: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   icon?: string;
 
   @Field()
   @IsString()
-  @IsOptional()
-  url?: string;
+  @IsNotEmpty()
+  url!: string;
 }

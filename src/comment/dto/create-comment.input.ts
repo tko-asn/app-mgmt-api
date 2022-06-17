@@ -1,22 +1,24 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateCommentInput {
   @Field()
   @IsString()
+  @IsNotEmpty()
   content!: string;
 
   @Field(() => ID)
   @IsString()
+  @IsNotEmpty()
   authorId!: string;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   @IsString()
   @IsOptional()
   svcId?: string;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   @IsString()
   @IsOptional()
   commentId?: string;

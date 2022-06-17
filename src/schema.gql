@@ -146,7 +146,6 @@ input CreateProfileInput {
 
 input UpdateProfileInput {
   username: String!
-  icon: String
   selfIntro: String
 }
 
