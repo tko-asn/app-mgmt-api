@@ -4,12 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Profile } from 'src/entities/profile.entity';
 import { Team } from 'src/entities/team.entity';
 import { ProfileService } from 'src/profile/profile.service';
-import { Like, Repository } from 'typeorm';
-import { CreateTeamInput } from './dto/create-team.input';
-import { UpdateTeamInput } from './dto/update-team.input';
+import { Repository } from 'typeorm';
+import { SetTeamInput } from './dto/set-team.input';
 
 @Injectable()
 export class TeamService {
@@ -18,12 +16,14 @@ export class TeamService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async findByTeamName(teamName: string) {
-    const teams = await this.teamRepository.find({
-      where: {
-        teamName: Like(`%${teamName}%`),
-      },
-    });
+  async findByTeamNameAndProfileId(teamName: string, profileId: string) {
+    const teams = await this.teamRepository
+      .createQueryBuilder('team')
+      .innerJoin('team.members', 'member', 'member.id = :profileId', {
+        profileId,
+      })
+      .where('team.teamName like :teamName', { teamName: `%${teamName}%` })
+      .getMany();
     if (!teams.length) {
       throw new NotFoundException('Cound not find teams');
     }
@@ -56,21 +56,24 @@ export class TeamService {
     return team;
   }
 
-  async create(team: CreateTeamInput) {
+  async create(team: SetTeamInput) {
     const { inviteeIds, memberIds, ...teamProps } = team;
     if (!memberIds.length) {
       throw new Error('Team needs at least one member');
     }
     const createdTeam = this.teamRepository.create(teamProps);
-    const members = await this.validateProfileIds(memberIds);
+    const members = await this.profileService.validateProfileIds(memberIds);
     createdTeam.members = members;
 
-    const invitees = await this.validateProfileIds(inviteeIds, members);
+    const invitees = await this.profileService.validateProfileIds(
+      inviteeIds,
+      members,
+    );
     createdTeam.invitees = invitees;
     return await this.teamRepository.save(createdTeam);
   }
 
-  async update(id: string, team: UpdateTeamInput) {
+  async update(id: string, team: SetTeamInput) {
     const { teamName, description, inviteeIds, memberIds } = team;
     if (!memberIds.length) {
       throw new Error('Team needs at least one member');
@@ -79,10 +82,13 @@ export class TeamService {
     teamName && (updatedTeam.teamName = teamName);
     description && (updatedTeam.description = description);
 
-    const members = await this.validateProfileIds(memberIds);
+    const members = await this.profileService.validateProfileIds(memberIds);
     updatedTeam.members = members;
 
-    const invitees = await this.validateProfileIds(inviteeIds, members);
+    const invitees = await this.profileService.validateProfileIds(
+      inviteeIds,
+      members,
+    );
     updatedTeam.invitees = invitees;
     return await this.teamRepository.save(updatedTeam);
   }
@@ -95,41 +101,9 @@ export class TeamService {
     return team;
   }
 
-  async validateProfileIds(profileIds: string[], actualProfiles?: Profile[]) {
-    let profileIdsToRegister = [...profileIds];
-
-    // profileIdsのprofileが既にactualProfilesに存在しているか検証
-    if (actualProfiles) {
-      const removeProfileIds: string[] = [];
-      for (const profile of actualProfiles) {
-        if (profileIds.includes(profile.id)) {
-          removeProfileIds.push(profile.id);
-        }
-      }
-      // 存在する場合は削除
-      profileIdsToRegister = profileIds.filter(
-        (profileId) => !removeProfileIds.includes(profileId),
-      );
-    }
-
-    if (!profileIdsToRegister.length) {
-      return [];
-    }
-
-    const profiles = await this.profileService
-      .findByIds(profileIdsToRegister)
-      .catch((err) => {
-        if (err.status === 404) {
-          throw new BadRequestException('Invalid profileIds');
-        }
-        throw err;
-      });
-    return profiles;
-  }
-
   async addInvitees(id: string, profileIds: string[]) {
     const { invitees: currentInvitees } = await this.validateTeam(id);
-    const newInvitees = await this.validateProfileIds(
+    const newInvitees = await this.profileService.validateProfileIds(
       profileIds,
       currentInvitees,
     );
@@ -149,7 +123,7 @@ export class TeamService {
 
   async addMembers(id: string, profileIds: string[]) {
     const { members: currentMembers } = await this.validateTeam(id);
-    const newMembers = await this.validateProfileIds(
+    const newMembers = await this.profileService.validateProfileIds(
       profileIds,
       currentMembers,
     );

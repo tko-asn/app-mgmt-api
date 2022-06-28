@@ -18,6 +18,19 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Comment {
+  id: ID!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  likes: [Profile!]
+  dislikes: [Profile!]
+  author: Profile!
+  svc: Svc
+  commentId: ID
+  comment: Comment
+}
+
 type Svc {
   id: ID!
   name: String!
@@ -28,6 +41,7 @@ type Svc {
   updatedAt: DateTime!
   developer: Profile
   team: Team
+  comments: [Comment!]
 }
 
 type Profile {
@@ -41,6 +55,9 @@ type Profile {
   services: [Svc!]
   inviters: [Team!]
   teams: [Team!]
+  likedComments: [Comment!]
+  dislikedComments: [Comment!]
+  comments: [Comment!]
 }
 
 type Svcs {
@@ -48,47 +65,87 @@ type Svcs {
   count: Int!
 }
 
+type TeamInvitees {
+  id: ID!
+  invitees: [Profile!]!
+}
+
+type TeamMembers {
+  id: ID!
+  members: [Profile!]!
+}
+
 type Teams {
   teams: [Team!]
   count: Float!
+}
+
+type Comments {
+  comments: [Comment!]
+  count: Int!
+  page: Int!
+}
+
+type CommentsOnComment {
+  comments: [Comment!]
+  count: Int!
+  page: Int!
+  commentId: ID!
+}
+
+type UpdateComment {
+  id: ID!
+  content: String!
 }
 
 type Query {
   getProfilesByUsername(username: String!): [Profile!]!
   getProfilesByIds(ids: [ID]!): [Profile!]!
   getProfileById(id: String!): Profile!
+  getProfileByUserId(userId: String!): Profile!
   getSvcs(page: Int!): Svcs!
   getSvcsByProfileId(profileId: String!, page: Int!): Svcs!
   getSvcById(id: String!): Svc!
-  getTeamsByTeamName(teamName: String!): [Team!]!
+  getTeamsByTeamNameAndMemberId(memberId: String!, teamName: String!): [Team!]!
   getTeamsByMemberId(memberId: String!, page: Int!): Teams!
   getTeamById(id: String!): Team!
+  getCommentsBySvcId(all: Boolean, page: Int, svcId: ID!): Comments!
+  getCommentsByCommentIds(page: Int, commentIds: [ID]!): [CommentsOnComment!]!
+  getCommentsByCommentId(all: Boolean, page: Int, commentId: ID!): Comments!
 }
 
 type Mutation {
-  getOrCreateProfile(input: CreateProfileInput!): Profile!
+  createProfile(input: CreateProfileInput!): Profile!
   updateProfile(input: UpdateProfileInput!, id: ID!): Profile!
+  changeIcon(icon: String!, id: ID!): Profile!
   deleteProfile(id: ID!): Profile!
   createSvc(input: CreateSvcInput!): Svc!
   updateSvc(input: UpdateSvcInput!, id: ID!): Svc!
   deleteSvc(id: ID!): Svc!
-  createTeam(input: CreateTeamInput!): Team!
-  updateTeam(input: UpdateTeamInput!, id: ID!): Team!
-  inviteUsersToTeam(profileIds: [String!]!, id: ID!): Team!
-  deleteInviteesFromTeam(profileIds: [String!]!, id: ID!): Team!
-  addMembersToTeam(profileIds: [String!]!, id: ID!): Team!
-  deleteMembersFromTeam(input: [String!]!, id: ID!): Team!
+  createTeam(input: SetTeamInput!): Team!
+  updateTeam(input: SetTeamInput!, id: ID!): Team!
+  inviteUsersToTeam(profileIds: [String!]!, id: ID!): TeamInvitees!
+  deleteInviteesFromTeam(profileIds: [String!]!, id: ID!): TeamInvitees!
+  addMembersToTeam(profileIds: [String!]!, id: ID!): TeamMembers!
+  deleteMembersFromTeam(profileIds: [String!]!, id: ID!): TeamMembers!
   deleteTeam(id: ID!): Team!
+  createComment(input: CreateCommentInput!): Comment!
+  likeComment(profileId: ID!, id: ID!): Comment!
+  removeLike(profileId: ID!, id: ID!): Comment!
+  dislikeComment(profileId: ID!, id: ID!): Comment!
+  removeDislike(profileId: ID!, id: ID!): Comment!
+  updateComment(content: String!, id: ID!): UpdateComment!
+  deleteComment(id: ID!): Comment!
 }
 
 input CreateProfileInput {
   username: String!
+  selfIntro: String
   userId: String!
 }
 
 input UpdateProfileInput {
-  username: String
-  icon: String
+  username: String!
   selfIntro: String
 }
 
@@ -102,22 +159,22 @@ input CreateSvcInput {
 }
 
 input UpdateSvcInput {
-  name: String
+  name: String!
   description: String
   icon: String
-  url: String
+  url: String!
 }
 
-input CreateTeamInput {
+input SetTeamInput {
   teamName: String!
   description: String
   inviteeIds: [ID]!
   memberIds: [ID!]!
 }
 
-input UpdateTeamInput {
-  teamName: String
-  description: String
-  inviteeIds: [ID]!
-  memberIds: [ID!]!
+input CreateCommentInput {
+  content: String!
+  authorId: ID!
+  svcId: ID
+  commentId: ID
 }

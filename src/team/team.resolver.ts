@@ -2,9 +2,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Public } from 'src/decorators/public.decorator';
 import { Team } from 'src/entities/team.entity';
+import { TeamInvitees } from 'src/models/team-invitees.models';
+import { TeamMembers } from 'src/models/team-members.models';
 import { Teams } from 'src/models/teams.models';
-import { CreateTeamInput } from './dto/create-team.input';
-import { UpdateTeamInput } from './dto/update-team.input';
+import { SetTeamInput } from './dto/set-team.input';
 import { TeamService } from './team.service';
 
 @Resolver(() => Team)
@@ -13,12 +14,17 @@ export class TeamResolver {
 
   @Query(() => [Team])
   @Public()
-  async getTeamsByTeamName(@Args('teamName') teamName: string) {
-    return this.teamService.findByTeamName(teamName).catch((err) => {
-      if (err.status === 404) {
-        return [];
-      }
-    });
+  async getTeamsByTeamNameAndMemberId(
+    @Args('teamName') teamName: string,
+    @Args('memberId') memberId: string,
+  ) {
+    return this.teamService
+      .findByTeamNameAndProfileId(teamName, memberId)
+      .catch((err) => {
+        if (err.status === 404) {
+          return [];
+        }
+      });
   }
 
   @Query(() => Teams)
@@ -36,19 +42,19 @@ export class TeamResolver {
   }
 
   @Mutation(() => Team)
-  createTeam(@Args('input', new ValidationPipe()) teamInput: CreateTeamInput) {
+  createTeam(@Args('input', new ValidationPipe()) teamInput: SetTeamInput) {
     return this.teamService.create(teamInput);
   }
 
   @Mutation(() => Team)
   updateTeam(
     @Args('id', { type: () => ID }) id: string,
-    @Args('input', new ValidationPipe()) teamInput: UpdateTeamInput,
+    @Args('input', new ValidationPipe()) teamInput: SetTeamInput,
   ) {
     return this.teamService.update(id, teamInput);
   }
 
-  @Mutation(() => Team)
+  @Mutation(() => TeamInvitees)
   inviteUsersToTeam(
     @Args('id', { type: () => ID }) id: string,
     @Args('profileIds', { type: () => [String] }) profileIds: string[],
@@ -56,7 +62,7 @@ export class TeamResolver {
     return this.teamService.addInvitees(id, profileIds);
   }
 
-  @Mutation(() => Team)
+  @Mutation(() => TeamInvitees)
   deleteInviteesFromTeam(
     @Args('id', { type: () => ID }) id: string,
     @Args('profileIds', { type: () => [String] }) profileIds: string[],
@@ -64,18 +70,20 @@ export class TeamResolver {
     return this.teamService.deleteInvitees(id, profileIds);
   }
 
-  @Mutation(() => Team)
-  addMembersToTeam(
+  @Mutation(() => TeamMembers)
+  async addMembersToTeam(
     @Args('id', { type: () => ID }) id: string,
     @Args('profileIds', { type: () => [String] }) profileIds: string[],
   ) {
-    return this.teamService.addMembers(id, profileIds);
+    const teamMembers = await this.teamService.addMembers(id, profileIds);
+    await this.teamService.deleteInvitees(id, profileIds);
+    return teamMembers;
   }
 
-  @Mutation(() => Team)
+  @Mutation(() => TeamMembers)
   deleteMembersFromTeam(
     @Args('id', { type: () => ID }) id: string,
-    @Args('input', { type: () => [String] }) profileIds: string[],
+    @Args('profileIds', { type: () => [String] }) profileIds: string[],
   ) {
     return this.teamService.deleteMembers(id, profileIds);
   }
