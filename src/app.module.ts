@@ -33,7 +33,9 @@ import { CommentModule } from './comment/comment.module';
       type: process.env.DB_TYPE,
       entities: ['./dist/**/*.entity.js'],
       extra: {
-        ssl: process.env.DB_SSL,
+        ssl: {
+          rejectUnauthorized: false,
+        },
       },
       synchronize: true,
     }),
