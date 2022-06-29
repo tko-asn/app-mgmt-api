@@ -11,6 +11,7 @@ declare namespace NodeJS {
     readonly DB_PORT: number;
     readonly DB_NAME: string;
     readonly DB_TYPE: any;
+    readonly DB_SSL: boolean;
     readonly FRONTEND_ORIGIN: string;
   }
 }
