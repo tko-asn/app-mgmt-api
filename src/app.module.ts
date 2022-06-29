@@ -32,6 +32,9 @@ import { CommentModule } from './comment/comment.module';
       database: process.env.DB_NAME,
       type: process.env.DB_TYPE,
       entities: ['./dist/**/*.entity.js'],
+      extra: {
+        ssl: process.env.DB_SSL,
+      },
       synchronize: true,
     }),
     ProfileModule,
